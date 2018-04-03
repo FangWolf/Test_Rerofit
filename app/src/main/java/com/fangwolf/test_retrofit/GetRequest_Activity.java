@@ -1,7 +1,14 @@
 package com.fangwolf.test_retrofit;
 
+import android.app.Application;
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -10,13 +17,23 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GetRequest_Activity extends AppCompatActivity {
-
+    EditText editText;
+    TextView textView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
-        requset();
+
+        editText = findViewById(R.id.edit);
+        textView = findViewById(R.id.textView);
+        Button button = findViewById(R.id.button);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requset();
+            }
+        });
     }
 
     private void requset() {
@@ -30,7 +47,7 @@ public class GetRequest_Activity extends AppCompatActivity {
         GetRequest_Interface request = retrofit.create(GetRequest_Interface.class);
 
         //对 发送请求 进行封装
-        Call<Translation> call = request.getCall();
+        Call<Translation> call = request.getCall("ajax.php?a=fy&f=auto&t=auto&w="+editText.getText().toString());
 
         //步骤6:发送网络请求(异步)
         call.enqueue(new Callback<Translation>() {
@@ -39,6 +56,7 @@ public class GetRequest_Activity extends AppCompatActivity {
             public void onResponse(Call<Translation> call, Response<Translation> response) {
                 // 步骤7：处理返回的数据结果
                 response.body().show();
+                textView.setText(response.body().show1());
             }
 
             //请求失败时回调

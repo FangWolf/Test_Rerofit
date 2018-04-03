@@ -21,4 +21,7 @@ public class Translation {
         System.out.println(content.out);
         System.out.println(content.errNo);
     }
+    public String show1() {
+        return content.out;
+    }
 }
