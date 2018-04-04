@@ -17,8 +17,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GetRequest_Activity extends AppCompatActivity {
-    EditText editText;
-    TextView textView;
+    EditText editText,editText2;
+    TextView textView,textView2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,11 +27,50 @@ public class GetRequest_Activity extends AppCompatActivity {
         editText = findViewById(R.id.edit);
         textView = findViewById(R.id.textView);
         Button button = findViewById(R.id.button);
+        Button button2 = findViewById(R.id.button2);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 requset();
+            }
+        });
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requset2();
+            }
+        });
+    }
+
+    private void requset2() {
+        //步骤4:创建Retrofit对象
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://fanyi.youdao.com/") // 设置 网络请求 Url
+                .addConverterFactory(GsonConverterFactory.create()) //设置使用Gson解析(记得加入依赖)
+                .build();
+
+        // 步骤5:创建 网络请求接口 的实例
+        PostRequest_Interface request = retrofit.create(PostRequest_Interface.class);
+
+        //对 发送请求 进行封装(设置需要翻译的内容)
+        Call<TranslationY> call = request.getCall("I love you");
+
+        //步骤6:发送网络请求(异步)
+        call.enqueue(new Callback<TranslationY>() {
+
+            //请求成功时回调
+            @Override
+            public void onResponse(Call<TranslationY> call, Response<TranslationY> response) {
+                // 步骤7：处理返回的数据结果：输出翻译的内容
+                System.out.println(response.body().getTranslateResult().get(0).get(0).getTgt());
+            }
+
+            //请求失败时回调
+            @Override
+            public void onFailure(Call<TranslationY> call, Throwable throwable) {
+                System.out.println("请求失败");
+                System.out.println(throwable.getMessage());
             }
         });
     }
