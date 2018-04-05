@@ -10,15 +10,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GetRequest_Activity extends AppCompatActivity {
-    EditText editText,editText2;
-    TextView textView,textView2;
+    EditText editText, editText2;
+    TextView textView, textView2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +54,7 @@ public class GetRequest_Activity extends AppCompatActivity {
         //步骤4:创建Retrofit对象
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://fanyi.youdao.com/") // 设置 网络请求 Url
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())//用Rxjava实现异步请求
                 .addConverterFactory(GsonConverterFactory.create()) //设置使用Gson解析(记得加入依赖)
                 .build();
 
@@ -79,13 +87,14 @@ public class GetRequest_Activity extends AppCompatActivity {
         //步骤4:创建Retrofit对象
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://fy.iciba.com/") // 设置 网络请求 Url
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create()) //设置使用Gson解析(记得加入依赖)
                 .build();
 
         // 步骤5:创建 网络请求接口 的实例
         GetRequest_Interface request = retrofit.create(GetRequest_Interface.class);
 
-        //对 发送请求 进行封装
+        /*//对 发送请求 进行封装
         Call<Translation> call = request.getCall("ajax.php?a=fy&f=auto&t=auto&w="+editText.getText().toString());
 
         //步骤6:发送网络请求(异步)
@@ -103,6 +112,32 @@ public class GetRequest_Activity extends AppCompatActivity {
             public void onFailure(Call<Translation> call, Throwable throwable) {
                 System.out.println("连接失败");
             }
-        });
+        });*/
+
+        //RxJava实现异步
+        Observable<Translation> observable = request.getCall("ajax.php?a=fy&f=auto&t=auto&w="+editText.getText().toString());
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Translation>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Translation translation) {
+                        textView.setText(translation.show1());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 }
